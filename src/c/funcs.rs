@@ -1,3 +1,5 @@
+//For now, only linux is supported. Support for os specific functions like WSAGetLastError
+//will be considered later.
 use c::types::*;
 
 #[link(name = "c")]
@@ -26,5 +28,8 @@ extern {
   pub fn freeaddrinfo(res: *mut addrinfo);
 
   pub fn gai_strerror(errcode: c_int) -> *const c_char;
+
+  //Consider using std::os::errno
+  static errno: c_int;
 }
 

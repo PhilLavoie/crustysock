@@ -138,6 +138,34 @@ pub struct Socket {
   sockfd: c_int
 }
 
-impl Socket {
-  pub fn new() -> Socket { assert!(false, "unimplemented yet"); Socket{ sockfd: -1 } }
+pub struct Domain{
+  domain: c_int
 }
+
+pub struct Protocol {
+  protocol: c_int
+}
+
+pub struct SocketType {
+  socket_type: c_int
+}
+
+
+impl Socket {
+  pub fn new(
+    domain: Domain,
+    socktype: SocketType, 
+    proto: Protocol
+  ) -> Result<Socket, String> { 
+    let maybe_sockfd = unsafe{ socket(domain.domain, socktype.socket_type, proto.protocol) };
+    
+    //Error values seem to be os specific from first look around. Therefore, this function
+    //does not return any meaningful error.
+    if maybe_sockfd < 0 { return Err(format!("unable to crate socket, error code: {}", maybe_sockfd)) }
+    Ok(Socket{ sockfd: maybe_sockfd })
+  }
+
+  
+}
+
+
