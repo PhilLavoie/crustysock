@@ -1,3 +1,4 @@
-#[test]
-fn it_works() {
-}
+#![feature(globs)]
+mod c;
+mod thincrust;
+
