@@ -1,16 +1,26 @@
-use c::funcs::{getprotobyname};
+//TODO: think of a design for reading the protocol database, that keeps the "connection alive".
+//There might be no real use case...
+//TODO: figure out if I HAVE to export the trait publically outside this module.
+
+//Define how errors and what errors are handled here.
+
+use c::funcs::{getprotobyname, getprotobynumber};
 use c::types::{c_int, protoent};
 
 use std::c_str::CString;
 
+//Below are utility functions used to extract fields from struct protoent.
+
+///Get the protocol number.
 fn extract_number(entry: *const protoent) -> c_int {
   unsafe{ (*entry).p_proto }
 }
-
+///Get the protocol name. Allocates a copy.
 fn extract_name(entry: *const protoent) -> String {
   unsafe{ CString::new((*entry).p_name, false).as_str().unwrap().to_string() } 
 }
-
+///Get the aliases of the protocol. Each one of them is copied into an
+///allocated string.
 fn extract_aliases(entry: *const protoent) -> Vec<String> {
   let mut aliases: Vec<String> = Vec::new();
   let mut current_alias = unsafe{ (*entry).p_aliases };
@@ -27,10 +37,15 @@ fn extract_aliases(entry: *const protoent) -> Vec<String> {
   aliases
 }
 
+///Trait to convert the native protocol entry to an equivalent rust protocol type.
 trait FromNative {
   fn from_native(entry: *const protoent) -> Self;
 }
 
+///Structure representing a protocol. This is a stripped down version
+///of ProtocolEntry. It does not hold any owned data regarding names and aliases.
+///It is, however, perfectly usable with the rest of the api (only the protocol number
+///matters in function calls).
 pub struct Protocol {
   number: c_int
 }
@@ -42,6 +57,7 @@ impl FromNative for Protocol {
 }
 
 impl Protocol {
+  ///Retrieves the protocol by name from the database, like "tcp" or "udp" for example.
   pub fn by_name(name: &str) -> Result<Protocol, String> {
     let entry = unsafe{ getprotobyname(name.to_c_str().as_ptr()) };
 
@@ -49,11 +65,22 @@ impl Protocol {
       return Err(format!("unable to retrieve protocol by name: {}", name));
     }
 
-    Ok( 
-      FromNative::from_native(entry)
-    )
+    Ok(FromNative::from_native(entry))
+  }
+  ///Retrieves the protocol by number from the database.
+  pub fn by_number(number: c_int) -> Result<Protocol, String> {
+    let entry = unsafe{ getprotobynumber(number) };
+
+    if entry.is_null() {
+      return Err(format!("unable to retrieve protocol by number: {}", number));
+    }
+
+    Ok(FromNative::from_native(entry))
   }
 
+  ///Sentinel value identifying the default protocol for a given address family
+  ///and socket type. For example, the default for Ipv4 on a stream socket is
+  ///tcp.
   pub fn default() -> Protocol { Protocol{ number: 0 } }
 }
 
@@ -74,7 +101,7 @@ impl FromNative for ProtocolEntry {
 }
 
 impl ProtocolEntry {
-  
+  ///Retrieves the protocol by name from the database, like "tcp" or "udp" for example.
   pub fn by_name(name: &str) -> Result<ProtocolEntry, String> {
     let entry = unsafe{ getprotobyname(name.to_c_str().as_ptr()) };
 
@@ -86,8 +113,22 @@ impl ProtocolEntry {
       FromNative::from_native(entry) 
     )
   }
+
+  ///Retrieves the protocol by number from the database.
+  pub fn by_number(number: c_int) -> Result<Protocol, String> {
+    let entry = unsafe{ getprotobynumber(number) };
+
+    if entry.is_null() {
+      return Err(format!("unable to retrieve protocol by number: {}", number));
+    }
+
+    Ok(FromNative::from_native(entry))
+  }
 }
 
+///Functions that use the protocol structure actually only need its number.
+///A trait is provided to allow both Protocol and ProtocolEntry to work
+///with the api.
 pub trait Proto {
   fn protocol_number(&self) -> c_int;
 }
