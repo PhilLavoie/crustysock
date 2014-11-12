@@ -149,7 +149,7 @@ pub struct Socket {
 
 impl Socket {
   pub fn new<P: Proto>(
-    domain:   AddressFamily,
+    domain:   ProtocolFamily,
     socktype: SocketType, 
     proto:    P
   ) -> Result<Socket, String> { 

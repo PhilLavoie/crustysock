@@ -13,6 +13,54 @@ macro_rules! typedef(
    );
 )
 
+//Protocol families.
+typedef!(ProtocolFamily, c_int)
+
+pub const PF_UNSPEC    : ProtocolFamily = ProtocolFamily{ get: consts::PF_UNSPEC };      //Unspecified.
+pub const PF_LOCAL     : ProtocolFamily = ProtocolFamily{ get: consts::PF_LOCAL };       //Local to host (pipes and file-domain).
+pub const PF_UNIX      : ProtocolFamily = ProtocolFamily{ get: consts::PF_UNIX };        // POSIX name for PF_LOCAL.
+pub const PF_FILE      : ProtocolFamily = ProtocolFamily{ get: consts::PF_FILE };        // Another non-standard name for PF_LOCAL.
+pub const PF_INET      : ProtocolFamily = ProtocolFamily{ get: consts::PF_INET };        // IP protocol family.
+pub const PF_AX25      : ProtocolFamily = ProtocolFamily{ get: consts::PF_AX25 };        // Amateur Radio AX.25.
+pub const PF_IPX       : ProtocolFamily = ProtocolFamily{ get: consts::PF_IPX };         // Novell Internet Protocol.
+pub const PF_APPLETALK : ProtocolFamily = ProtocolFamily{ get: consts::PF_APPLETALK };   // Appletalk DDP.
+pub const PF_NETROM    : ProtocolFamily = ProtocolFamily{ get: consts::PF_NETROM };      // Amateur radio NetROM.
+pub const PF_BRIDGE    : ProtocolFamily = ProtocolFamily{ get: consts::PF_BRIDGE };      // Multiprotocol bridge.
+pub const PF_ATMPVC    : ProtocolFamily = ProtocolFamily{ get: consts::PF_ATMPVC };      // ATM PVCs.
+pub const PF_X25       : ProtocolFamily = ProtocolFamily{ get: consts::PF_X25 };         // Reserved for X.25 project.
+pub const PF_INET6     : ProtocolFamily = ProtocolFamily{ get: consts::PF_INET6 };       // IP version 6.
+pub const PF_ROSE      : ProtocolFamily = ProtocolFamily{ get: consts::PF_ROSE };        // Amateur Radio X.25 PLP.
+pub const PF_DECnet    : ProtocolFamily = ProtocolFamily{ get: consts::PF_DECnet };      // Reserved for DECnet project.
+pub const PF_NETBEUI   : ProtocolFamily = ProtocolFamily{ get: consts::PF_NETBEUI };     // Reserved for 802.2LLC project.
+pub const PF_SECURITY  : ProtocolFamily = ProtocolFamily{ get: consts::PF_SECURITY };    // Security callback pseudo AF.
+pub const PF_KEY       : ProtocolFamily = ProtocolFamily{ get: consts::PF_KEY };         // PF_KEY key management API.
+pub const PF_NETLINK   : ProtocolFamily = ProtocolFamily{ get: consts::PF_NETLINK };
+pub const PF_ROUTE     : ProtocolFamily = ProtocolFamily{ get: consts::PF_ROUTE };       // Alias to emulate 4.4BSD.
+pub const PF_PACKET    : ProtocolFamily = ProtocolFamily{ get: consts::PF_PACKET };      // Packet family.
+pub const PF_ASH       : ProtocolFamily = ProtocolFamily{ get: consts::PF_ASH };         // Ash.
+pub const PF_ECONET    : ProtocolFamily = ProtocolFamily{ get: consts::PF_ECONET };      // Acorn Econet.
+pub const PF_ATMSVC    : ProtocolFamily = ProtocolFamily{ get: consts::PF_ATMSVC };      // ATM SVCs.
+pub const PF_RDS       : ProtocolFamily = ProtocolFamily{ get: consts::PF_RDS };         // RDS sockets.
+pub const PF_SNA       : ProtocolFamily = ProtocolFamily{ get: consts::PF_SNA };         // Linux SNA Project
+pub const PF_IRDA      : ProtocolFamily = ProtocolFamily{ get: consts::PF_IRDA };        // IRDA sockets.
+pub const PF_PPPOX     : ProtocolFamily = ProtocolFamily{ get: consts::PF_PPPOX };       // PPPoX sockets.
+pub const PF_WANPIPE   : ProtocolFamily = ProtocolFamily{ get: consts::PF_WANPIPE };     // Wanpipe API sockets.
+pub const PF_LLC       : ProtocolFamily = ProtocolFamily{ get: consts::PF_LLC };         // Linux LLC.
+pub const PF_CAN       : ProtocolFamily = ProtocolFamily{ get: consts::PF_CAN };         // Controller Area Network.
+pub const PF_TIPC      : ProtocolFamily = ProtocolFamily{ get: consts::PF_TIPC };        // TIPC sockets.
+pub const PF_BLUETOOTH : ProtocolFamily = ProtocolFamily{ get: consts::PF_BLUETOOTH };   // Bluetooth sockets.
+pub const PF_IUCV      : ProtocolFamily = ProtocolFamily{ get: consts::PF_IUCV };        // IUCV sockets.
+pub const PF_RXRPC     : ProtocolFamily = ProtocolFamily{ get: consts::PF_RXRPC };       // RxRPC sockets.
+pub const PF_ISDN      : ProtocolFamily = ProtocolFamily{ get: consts::PF_ISDN };        // mISDN sockets.
+pub const PF_PHONET    : ProtocolFamily = ProtocolFamily{ get: consts::PF_PHONET };      // Phonet sockets.
+pub const PF_IEEE802154: ProtocolFamily = ProtocolFamily{ get: consts::PF_IEEE802154 };  // IEEE 802.15.4 sockets.
+pub const PF_CAIF      : ProtocolFamily = ProtocolFamily{ get: consts::PF_CAIF };        // CAIF sockets.
+pub const PF_ALG       : ProtocolFamily = ProtocolFamily{ get: consts::PF_ALG };         // Algorithm sockets.
+pub const PF_NFC       : ProtocolFamily = ProtocolFamily{ get: consts::PF_NFC };         // NFC sockets.
+pub const PF_VSOCK     : ProtocolFamily = ProtocolFamily{ get: consts::PF_VSOCK };       // vSockets.
+pub const PF_MAX       : ProtocolFamily = ProtocolFamily{ get: consts::PF_MAX };         // For now..
+
+
 //Address families.
 typedef!(AddressFamily, c_int)
 
