@@ -1,2 +1,4 @@
-crustysock is a library that wraps over the native berkely sockets library and provides a rust api.
-The name means "c", "rust" "socket" api.
+crustysock is a library intended to:
+  - provide rust wrappers over the berkeley sockets C api
+  - provide a thin rust api layer over the wrappers
+  - provide another higher layer on top of that to support most common functionalities.

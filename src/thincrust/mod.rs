@@ -1,10 +1,17 @@
-use c::consts::*;
+//TODO: define a uniform error message/number mechanism. Maybe look into what rust std api provides, like IOError or something.
+
+use c;    //Since consts in the c libary and in thincrust have name clashes,
+          //c constants are referred to with their qualified name.
 use c::funcs::*;
 use c::types::*;
+
+pub use thincrust::consts::*;
 
 use std::mem;
 use std::c_str::CString;
 use std::num::Int;
+
+mod consts;
 
 ///Represents an ip address of version 4 or 6.
 pub enum IpAddress {
@@ -53,7 +60,7 @@ pub struct AddressInfo {
 
 impl AddressInfo {
   fn new(ai: &addrinfo) -> AddressInfo {
-    if (*ai).ai_family == AF_INET {
+    if (*ai).ai_family == c::consts::AF_INET {
       //The ai_addr is expected to be of type sockaddr_in.
       let sap = unsafe { &*((*ai).ai_addr as *const sockaddr_in) };
       //The address is under sin_addr.s_addr field, and in network endianness (big).
@@ -105,16 +112,16 @@ impl Iterator<AddressInfo> for AddressInfoIterator {
 }
 
 ///A convenient wrapper around getaddrinfo function.
-pub fn get_host_addresses(host: &str, service: &str) -> Result<AddressInfoIterator, String> {
+pub fn get_address_info(host: &str, service: &str) -> Result<AddressInfoIterator, String> {
   let node = host.to_c_str();
   let service = service.to_c_str();
   let mut hints: addrinfo = unsafe { mem::zeroed() };
   let mut res: *mut addrinfo = unsafe { mem::zeroed() };
 
   //Initialize hints.
-  hints.ai_family   = AF_UNSPEC;  //Any family: ipv6 or ipv6.
-  hints.ai_socktype = 0;                  //0 in this field indicates any socket type.
-  hints.ai_flags    = AI_PASSIVE; //Fills out the rest.
+  hints.ai_family   = c::consts::AF_UNSPEC;   //Any family: ipv6 or ipv6.
+  hints.ai_socktype = 0;                      //0 in this field indicates any socket type.
+  hints.ai_flags    = c::consts::AI_PASSIVE;  //Fills out the rest.
 
   unsafe {
     let errno = getaddrinfo(
@@ -134,38 +141,71 @@ pub fn get_host_addresses(host: &str, service: &str) -> Result<AddressInfoIterat
   }
 }
 
+//We need the get proto functions here.
+pub struct Protocol {
+  name: String,
+  aliases: Vec<String>,
+  number: c_int 
+}
+
+impl Protocol {
+  pub fn by_name(name: &str) -> Result<Protocol, String> {
+    let entry = unsafe{ getprotobyname(name.to_c_str().as_ptr()) };
+
+    if entry.is_null() {
+      return Err(format!("unable to retrieve protocol by name: {}", name));
+    }
+
+    let mut aliases: Vec<String> = Vec::new();
+    let mut current_alias = unsafe{ (*entry).p_aliases };
+    
+    while !current_alias.is_null() {
+      let rust_string = 
+        unsafe{ CString::new(*current_alias, false).as_str().unwrap().to_string() };
+      
+      aliases.push(rust_string);
+
+      current_alias = unsafe{ current_alias.offset(1) }; 
+    }
+
+    Ok( 
+      Protocol {
+        name: unsafe{ CString::new((*entry).p_name, false).as_str().unwrap().to_string() },
+        aliases: aliases,
+        number: unsafe{ (*entry).p_proto }
+      }
+    )
+  }
+
+  pub fn default() -> Protocol {
+    Protocol{ name: String::new(), aliases: Vec::new(), number: 0 }
+  }
+}
+
+
 pub struct Socket {
   sockfd: c_int
 }
 
-pub struct Domain{
-  domain: c_int
-}
-
-pub struct Protocol {
-  protocol: c_int
-}
-
-pub struct SocketType {
-  socket_type: c_int
-}
-
-
 impl Socket {
   pub fn new(
-    domain: Domain,
+    domain:   AddressFamily,
     socktype: SocketType, 
-    proto: Protocol
+    proto:    Protocol
   ) -> Result<Socket, String> { 
-    let maybe_sockfd = unsafe{ socket(domain.domain, socktype.socket_type, proto.protocol) };
+    let maybe_sockfd = unsafe{ socket(domain.get(), socktype.get(), proto.number) };
     
     //Error values seem to be os specific from first look around. Therefore, this function
     //does not return any meaningful error.
-    if maybe_sockfd < 0 { return Err(format!("unable to crate socket, error code: {}", maybe_sockfd)) }
+    if maybe_sockfd < 0 { return Err(format!("unable to create socket, error code: {}", maybe_sockfd)) }
     Ok(Socket{ sockfd: maybe_sockfd })
   }
 
-  
+  //Maybe return a new structure: Bound socket?
+  pub fn bind(&mut self, sockaddr: SocketAddress) -> Result<(), String> {
+   assert!(false, "unimplemented yet");
+   Ok(())
+  }
 }
 
 

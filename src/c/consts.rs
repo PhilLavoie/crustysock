@@ -68,6 +68,7 @@ pub const PF_ALG       : c_int = 38;  // Algorithm sockets.
 pub const PF_NFC       : c_int = 39;  // NFC sockets.
 pub const PF_VSOCK     : c_int = 40;  // vSockets.
 pub const PF_MAX       : c_int = 41;  // For now..
+
 //Address families.
 pub const AF_UNSPEC    : c_int =  PF_UNSPEC;
 pub const AF_LOCAL     : c_int =  PF_LOCAL;

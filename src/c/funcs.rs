@@ -4,6 +4,7 @@ use c::types::*;
 
 #[link(name = "c")]
 extern {
+  //Socket related functions.
   pub fn socket(domain: c_int, sock_type: c_int, protocol: c_int) -> c_int;
 
   pub fn close(sockfd: c_int) -> c_int;
@@ -18,6 +19,7 @@ extern {
   
   pub fn getsockname(sockfd: c_int, addr: *mut sockaddr, addrlen: *mut socklen_t) -> c_int;
 
+  //Addrinfo related functions.
   pub fn getaddrinfo(
     node: *const c_char,
     service: *const c_char,
@@ -28,6 +30,17 @@ extern {
   pub fn freeaddrinfo(res: *mut addrinfo);
 
   pub fn gai_strerror(errcode: c_int) -> *const c_char;
+
+  //Protocol entry functions.
+  pub fn getprotoent() -> *const protoent;
+
+  pub fn getprotobyname(name: *const c_char) -> *const protoent;
+
+  pub fn getprotobynumber(proto: c_int) -> *const protoent;
+
+  pub fn setprotoent(stayopen: c_int);
+
+  pub fn endprotoent();
 
   //Consider using std::os::errno
   static errno: c_int;

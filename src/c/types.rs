@@ -1,3 +1,5 @@
+///C types translated into rust.
+
 //Basic primitive c types are imported directly from the already provided interface
 //of the standard rust library, since the compiler is in better position to provide
 //the size of a c_int for example. Most of the other types are defined here
@@ -6,6 +8,15 @@ extern crate libc;
 
 pub use self::libc::{c_char, c_int, socklen_t, sa_family_t};
 pub use self::libc::types::os::common::bsd44::{in_port_t, in_addr_t};
+
+///Protocol entry extracted from the protocol database (/etc/protocols on Linux for example)
+///by related functions, like getprotobyname().
+pub struct protoent {
+  pub p_name:     *const c_char,        //Official protocol name
+  pub p_aliases:  *const *const c_char, //Alias list
+  pub p_proto:    c_int,                //Protocol number
+}
+
 
 pub struct in_addr {
   pub s_addr: in_addr_t,
