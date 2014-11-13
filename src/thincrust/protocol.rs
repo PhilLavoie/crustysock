@@ -2,14 +2,22 @@
 //There might be no real use case...
 //TODO: figure out if I HAVE to export the trait publically outside this module.
 
-//Define how errors and what errors are handled here.
+//TODO: Define how errors and what errors are handled here.
+
+//TODO: The retrieved protoent's number field is supposed to be in host endianness. Test it.
 
 use c::funcs::{getprotobyname, getprotobynumber};
-use c::types::{c_int, protoent};
+use c::types::{c_int, c_char, protoent};
 
 use std::c_str::CString;
 
 //Below are utility functions used to extract fields from struct protoent.
+fn c_str_to_string(c_string: *const c_char, owns: bool) -> String {
+  if c_string.is_null() { 
+    return String::new(); 
+  }
+  return unsafe{ CString::new(c_string, owns) }.as_str().unwrap().to_string(); 
+}
 
 ///Get the protocol number.
 fn extract_number(entry: *const protoent) -> c_int {
@@ -17,18 +25,20 @@ fn extract_number(entry: *const protoent) -> c_int {
 }
 ///Get the protocol name. Allocates a copy.
 fn extract_name(entry: *const protoent) -> String {
-  unsafe{ CString::new((*entry).p_name, false).as_str().unwrap().to_string() } 
+  c_str_to_string(unsafe{ (*entry).p_name }, false)
 }
 ///Get the aliases of the protocol. Each one of them is copied into an
 ///allocated string.
 fn extract_aliases(entry: *const protoent) -> Vec<String> {
   let mut aliases: Vec<String> = Vec::new();
   let mut current_alias = unsafe{ (*entry).p_aliases };
+
+  if current_alias.is_null() { return aliases; }
     
-  while !current_alias.is_null() {
+  while !(unsafe{ (*current_alias) }.is_null()) {
     let rust_string = 
-      unsafe{ CString::new(*current_alias, false).as_str().unwrap().to_string() };
-      
+      c_str_to_string(unsafe{ *current_alias }, false);
+  
     aliases.push(rust_string);
 
     current_alias = unsafe{ current_alias.offset(1) }; 
@@ -115,7 +125,7 @@ impl ProtocolEntry {
   }
 
   ///Retrieves the protocol by number from the database.
-  pub fn by_number(number: c_int) -> Result<Protocol, String> {
+  pub fn by_number(number: c_int) -> Result<ProtocolEntry, String> {
     let entry = unsafe{ getprotobynumber(number) };
 
     if entry.is_null() {
@@ -141,4 +151,11 @@ impl Proto for ProtocolEntry {
   fn protocol_number(&self) -> c_int { self.number }
 }
 
-
+#[test]
+fn test_endianness() {
+  let proto = Protocol::by_name("tcp").unwrap();
+  assert!(proto.protocol_number() == 6);
+  let proto_entry = ProtocolEntry::by_number(6).unwrap();
+  assert!(proto_entry.name.as_slice() == "tcp");
+  assert!(proto_entry.protocol_number() == 6);
+}
