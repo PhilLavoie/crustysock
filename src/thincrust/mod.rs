@@ -12,8 +12,8 @@ use std::mem;
 use std::c_str::CString;
 use std::num::Int;
 
-mod consts;
-mod protocol;
+pub mod consts;
+pub mod protocol;
 
 ///Represents an ip address of version 4 or 6.
 pub enum IpAddress {

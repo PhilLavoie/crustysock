@@ -1,15 +1,18 @@
 //TODO: think of a design for reading the protocol database, that keeps the "connection alive".
 //There might be no real use case...
 //TODO: figure out if I HAVE to export the trait publically outside this module.
-
+//TODO: the protocol header in ipv4 is 8 bit fields, check what it is in ipv6 and possibly set the approriate int size.
 //TODO: Define how errors and what errors are handled here.
-
+//TODO: create a fallback mechanism to create Protocol given a number in case the database provided by os is incomplete.
 //TODO: The retrieved protoent's number field is supposed to be in host endianness. Test it.
-
-use c::funcs::{getprotobyname, getprotobynumber};
+//MODULE need to be tests sequentially, maybe whole crate. Will investigate...
+use c::funcs::{getprotobyname, getprotobynumber, getprotoent, setprotoent, endprotoent};
 use c::types::{c_int, c_char, protoent};
 
 use std::c_str::CString;
+use std::iter::Iterator;
+use std::iter::order;
+use std::vec::Vec;
 
 //Below are utility functions used to extract fields from struct protoent.
 fn c_str_to_string(c_string: *const c_char, owns: bool) -> String {
@@ -48,8 +51,45 @@ fn extract_aliases(entry: *const protoent) -> Vec<String> {
 }
 
 ///Trait to convert the native protocol entry to an equivalent rust protocol type.
-trait FromNative {
+pub trait FromNative {
   fn from_native(entry: *const protoent) -> Self;
+}
+
+///To be used for listing all database entries.
+///It is very important to note that this structure is just a layer above
+///the calls setprotoent(), getprotoent() and endprotoent(), provided from the C api.
+///Constructing an instance of this type should ONLY BE DONE when no other instances
+///are in use. 2 instances should never be used in parallel. If such a feature is needed,
+///it is strongly suggested that the user makes a local copy of the whole database
+///(which isn't very large anyways).
+///When the iterator is constructed, it opens a connection to the database and rewinds
+///it's current entry to the first one. Every call to next() fetches and moves the current
+///entry. When the end of the file has been reached, None is returned. When the iterator is
+///destroyed, the connection to the database is closed. 
+pub struct DatabaseIterator<P: FromNative>;
+
+impl<P: FromNative> DatabaseIterator<P> {
+  fn new() -> DatabaseIterator<P> { 
+    unsafe{ setprotoent(1) }; //Stay open for fast access and rewind to first entry.
+    DatabaseIterator
+  }
+}
+
+#[unsafe_destructor]
+impl<P: FromNative> Drop for DatabaseIterator<P> {
+  fn drop(&mut self) { unsafe{ endprotoent() }; }
+}
+
+impl<P: FromNative> Iterator<P> for DatabaseIterator<P> {
+  fn next(&mut self) -> Option<P> {
+   let entry = unsafe{ getprotoent() };
+
+    if entry.is_null() {
+      return None;
+    }
+
+    return Some(FromNative::from_native(entry)); 
+  }
 }
 
 ///Structure representing a protocol. This is a stripped down version
@@ -86,6 +126,10 @@ impl Protocol {
     }
 
     Ok(FromNative::from_native(entry))
+  }
+
+  pub fn database_iter() -> DatabaseIterator<Protocol> {
+    DatabaseIterator
   }
 
   ///Sentinel value identifying the default protocol for a given address family
@@ -134,6 +178,10 @@ impl ProtocolEntry {
 
     Ok(FromNative::from_native(entry))
   }
+
+  pub fn database_iter() -> DatabaseIterator<ProtocolEntry> {
+    DatabaseIterator
+  }
 }
 
 ///Functions that use the protocol structure actually only need its number.
@@ -152,10 +200,68 @@ impl Proto for ProtocolEntry {
 }
 
 #[test]
-fn test_endianness() {
-  let proto = Protocol::by_name("tcp").unwrap();
-  assert!(proto.protocol_number() == 6);
-  let proto_entry = ProtocolEntry::by_number(6).unwrap();
-  assert!(proto_entry.name.as_slice() == "tcp");
-  assert!(proto_entry.protocol_number() == 6);
+fn test_by_number() {
+  {
+    let proto = Protocol::by_number(6);
+    assert!(proto.is_ok());
+    //This also tests for host endianness.
+    assert!(proto.unwrap().protocol_number() == 6);
+  }
+  {
+    let proto_entry = ProtocolEntry::by_number(17);
+    assert!(proto_entry.is_ok());
+    //TODO: Find a way to easily do case insensitive string comparisons
+    //because there is no guarantee on caps me thinks, anyways shouldn't assume.
+    let unwrapped = proto_entry.unwrap();
+    assert!(unwrapped.name.as_slice() == "udp");
+    assert!(unwrapped.protocol_number() == 17);
+  }
+}
+
+#[test]
+fn test_by_name() {
+  {
+    let mut proto = Protocol::by_name("icmp");
+    assert!(proto.is_ok());
+    assert!(proto.unwrap().protocol_number() == 1);
+    proto = Protocol::by_name("tcp");
+    assert!(proto.is_ok());
+    assert!(proto.unwrap().protocol_number() == 6);
+    proto = Protocol::by_name("udp");
+    assert!(proto.is_ok());
+    assert!(proto.unwrap().protocol_number() == 17);
+  }
+  {
+    let mut proto = ProtocolEntry::by_name("icmp");
+    assert!(proto.is_ok());
+    let mut unwrapped = proto.unwrap();
+    assert!(unwrapped.protocol_number() == 1);
+    assert!(unwrapped.name.as_slice() == "icmp");
+
+    proto = ProtocolEntry::by_name("tcp");
+    assert!(proto.is_ok());
+    unwrapped = proto.unwrap();
+    assert!(unwrapped.protocol_number() == 6);
+    assert!(unwrapped.name.as_slice() == "tcp");
+
+    proto = ProtocolEntry::by_name("udp");
+    assert!(proto.is_ok());
+    unwrapped = proto.unwrap();
+    assert!(unwrapped.protocol_number() == 17);
+    assert!(unwrapped.name.as_slice() == "udp");
+  }
+}
+
+#[test]
+fn test_database_iter() {
+  let proto_db: Vec<Protocol> = FromIterator::from_iter(Protocol::database_iter());
+  let proto_entry_db: Vec<ProtocolEntry> = FromIterator::from_iter(ProtocolEntry::database_iter());
+
+  assert!(proto_db.len() == proto_entry_db.len(), "protocol database length: {}, protocol entry database length: {}", proto_db.len(), proto_entry_db.len());
+  assert!(
+    order::cmp(
+      proto_db.iter().map(|p: &Protocol| { return p.protocol_number() }),
+      proto_entry_db.iter().map(|p: &ProtocolEntry| { return p.protocol_number() }),
+    ) == Equal
+  );
 }

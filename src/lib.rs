@@ -1,4 +1,4 @@
-#![feature(globs, macro_rules)]
-mod c;
-mod thincrust;
+#![feature(globs, macro_rules, unsafe_destructor)]
+pub mod c;
+pub mod thincrust;
 
