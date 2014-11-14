@@ -1,10 +1,5 @@
-//TODO: think of a design for reading the protocol database, that keeps the "connection alive".
-//There might be no real use case...
-//TODO: figure out if I HAVE to export the trait publically outside this module.
-//TODO: the protocol header in ipv4 is 8 bit fields, check what it is in ipv6 and possibly set the approriate int size.
 //TODO: Define how errors and what errors are handled here.
 //TODO: create a fallback mechanism to create Protocol given a number in case the database provided by os is incomplete.
-//TODO: The retrieved protoent's number field is supposed to be in host endianness. Test it.
 //MODULE need to be tests sequentially, maybe whole crate. Will investigate...
 use c::funcs::{getprotobyname, getprotobynumber, getprotoent, setprotoent, endprotoent};
 use c::types::{c_int, c_char, protoent};
@@ -14,13 +9,17 @@ use std::iter::Iterator;
 use std::iter::order;
 use std::vec::Vec;
 
-//Below are utility functions used to extract fields from struct protoent.
+pub type ProtocolInt = c_int;
+
+///Native c string to rust owned String conversion.
 fn c_str_to_string(c_string: *const c_char, owns: bool) -> String {
   if c_string.is_null() { 
     return String::new(); 
   }
   return unsafe{ CString::new(c_string, owns) }.as_str().unwrap().to_string(); 
 }
+
+//Below are utility functions used to extract fields from struct protoent.
 
 ///Get the protocol number.
 fn extract_number(entry: *const protoent) -> c_int {
@@ -97,7 +96,7 @@ impl<P: FromNative> Iterator<P> for DatabaseIterator<P> {
 ///It is, however, perfectly usable with the rest of the api (only the protocol number
 ///matters in function calls).
 pub struct Protocol {
-  number: c_int
+  number: ProtocolInt
 }
 
 impl FromNative for Protocol {
@@ -118,7 +117,7 @@ impl Protocol {
     Ok(FromNative::from_native(entry))
   }
   ///Retrieves the protocol by number from the database.
-  pub fn by_number(number: c_int) -> Result<Protocol, String> {
+  pub fn by_number(number: ProtocolInt) -> Result<Protocol, String> {
     let entry = unsafe{ getprotobynumber(number) };
 
     if entry.is_null() {
@@ -135,13 +134,15 @@ impl Protocol {
   ///Sentinel value identifying the default protocol for a given address family
   ///and socket type. For example, the default for Ipv4 on a stream socket is
   ///tcp.
-  pub fn default() -> Protocol { Protocol{ number: 0 } }
+  pub fn default() -> Protocol { Protocol::new(0) }
+
+  pub fn new(proto: ProtocolInt) -> Protocol { Protocol{ number: proto } }
 }
 
 pub struct ProtocolEntry {
   name: String,
   aliases: Vec<String>,
-  number: c_int 
+  number: ProtocolInt
 }
 
 impl FromNative for ProtocolEntry {
@@ -169,7 +170,7 @@ impl ProtocolEntry {
   }
 
   ///Retrieves the protocol by number from the database.
-  pub fn by_number(number: c_int) -> Result<ProtocolEntry, String> {
+  pub fn by_number(number: ProtocolInt) -> Result<ProtocolEntry, String> {
     let entry = unsafe{ getprotobynumber(number) };
 
     if entry.is_null() {
@@ -188,15 +189,15 @@ impl ProtocolEntry {
 ///A trait is provided to allow both Protocol and ProtocolEntry to work
 ///with the api.
 pub trait Proto {
-  fn protocol_number(&self) -> c_int;
+  fn protocol_number(&self) -> ProtocolInt;
 }
 
 impl Proto for Protocol {
-  fn protocol_number(&self) -> c_int { self.number }
+  fn protocol_number(&self) -> ProtocolInt { self.number }
 }
 
 impl Proto for ProtocolEntry {
-  fn protocol_number(&self) -> c_int { self.number }
+  fn protocol_number(&self) -> ProtocolInt { self.number }
 }
 
 #[test]
@@ -257,6 +258,7 @@ fn test_database_iter() {
   let proto_db: Vec<Protocol> = FromIterator::from_iter(Protocol::database_iter());
   let proto_entry_db: Vec<ProtocolEntry> = FromIterator::from_iter(ProtocolEntry::database_iter());
 
+  //At the very least we expect both iterator to provide the same database.
   assert!(proto_db.len() == proto_entry_db.len(), "protocol database length: {}, protocol entry database length: {}", proto_db.len(), proto_entry_db.len());
   assert!(
     order::cmp(
