@@ -1,6 +1,5 @@
-//TODO: Define how errors and what errors are handled here.
-//TODO: create a fallback mechanism to create Protocol given a number in case the database provided by os is incomplete.
-//MODULE need to be tests sequentially, maybe whole crate. Will investigate...
+//TODO: Define how errors and what errors are handled here. Problem: There is no mention of error handling for this in the linux manual, however windows seem to provide error codes for these functions.
+//MODULE need to be tested sequentially, maybe whole crate. Will investigate...
 use c::funcs::{getprotobyname, getprotobynumber, getprotoent, setprotoent, endprotoent};
 use c::types::{c_int, c_char, protoent};
 
@@ -13,9 +12,7 @@ pub type ProtocolInt = c_int;
 
 ///Native c string to rust owned String conversion.
 fn c_str_to_string(c_string: *const c_char, owns: bool) -> String {
-  if c_string.is_null() { 
-    return String::new(); 
-  }
+  assert!(!c_string.is_null());
   return unsafe{ CString::new(c_string, owns) }.as_str().unwrap().to_string(); 
 }
 
@@ -23,15 +20,23 @@ fn c_str_to_string(c_string: *const c_char, owns: bool) -> String {
 
 ///Get the protocol number.
 fn extract_number(entry: *const protoent) -> c_int {
+  assert!(!entry.is_null());
   unsafe{ (*entry).p_proto }
 }
+
 ///Get the protocol name. Allocates a copy.
 fn extract_name(entry: *const protoent) -> String {
+  assert!(!entry.is_null());
   c_str_to_string(unsafe{ (*entry).p_name }, false)
 }
-///Get the aliases of the protocol. Each one of them is copied into an
-///allocated string.
+
+/**
+  Get the aliases of the protocol. Each one of them is copied into an
+  allocated string.
+*/
 fn extract_aliases(entry: *const protoent) -> Vec<String> {
+  assert!(!entry.is_null());
+
   let mut aliases: Vec<String> = Vec::new();
   let mut current_alias = unsafe{ (*entry).p_aliases };
 
@@ -52,6 +57,11 @@ fn extract_aliases(entry: *const protoent) -> Vec<String> {
 ///Trait to convert the native protocol entry to an equivalent rust protocol type.
 pub trait FromNative {
   fn from_native(entry: *const protoent) -> Self;
+}
+
+fn result_for<P: FromNative, E>(entry: *const protoent, err: || -> E) -> Result<P, E> {
+  if entry.is_null() { return Err(err()); }
+  return Ok(FromNative::from_native(entry));
 }
 
 ///To be used for listing all database entries.
@@ -109,33 +119,23 @@ impl Protocol {
   ///Retrieves the protocol by name from the database, like "tcp" or "udp" for example.
   pub fn by_name(name: &str) -> Result<Protocol, String> {
     let entry = unsafe{ getprotobyname(name.to_c_str().as_ptr()) };
-
-    if entry.is_null() {
-      return Err(format!("unable to retrieve protocol by name: {}", name));
-    }
-
-    Ok(FromNative::from_native(entry))
+    result_for(entry, || { format!("unable to retrieve protocol by name: {}", name) } )
   }
   ///Retrieves the protocol by number from the database.
   pub fn by_number(number: ProtocolInt) -> Result<Protocol, String> {
     let entry = unsafe{ getprotobynumber(number) };
-
-    if entry.is_null() {
-      return Err(format!("unable to retrieve protocol by number: {}", number));
-    }
-
-    Ok(FromNative::from_native(entry))
+    result_for(entry, || { format!("unable to retrieve protocol by number: {}", number) } )
   }
-
+  ///Returns a database iterator of procotols.
   pub fn database_iter() -> DatabaseIterator<Protocol> {
     DatabaseIterator
   }
-
   ///Sentinel value identifying the default protocol for a given address family
   ///and socket type. For example, the default for Ipv4 on a stream socket is
   ///tcp.
   pub fn default() -> Protocol { Protocol::new(0) }
-
+  ///This is a constructor provided in case, for some reason, either the database is unavailable
+  ///or the protocol desired is not in there.
   pub fn new(proto: ProtocolInt) -> Protocol { Protocol{ number: proto } }
 }
 
@@ -156,30 +156,17 @@ impl FromNative for ProtocolEntry {
 }
 
 impl ProtocolEntry {
-  ///Retrieves the protocol by name from the database, like "tcp" or "udp" for example.
+  ///Retrieves the protocol entry by name from the database, like "tcp" or "udp" for example.
   pub fn by_name(name: &str) -> Result<ProtocolEntry, String> {
     let entry = unsafe{ getprotobyname(name.to_c_str().as_ptr()) };
-
-    if entry.is_null() {
-      return Err(format!("unable to retrieve protocol by name: {}", name));
-    }
-    
-    Ok( 
-      FromNative::from_native(entry) 
-    )
+    result_for(entry, || { format!("unable to retrieve protocol by name: {}", name) } )
   }
-
-  ///Retrieves the protocol by number from the database.
+  ///Retrieves the protocol entry by number from the database.
   pub fn by_number(number: ProtocolInt) -> Result<ProtocolEntry, String> {
     let entry = unsafe{ getprotobynumber(number) };
-
-    if entry.is_null() {
-      return Err(format!("unable to retrieve protocol by number: {}", number));
-    }
-
-    Ok(FromNative::from_native(entry))
+    result_for(entry, || { format!("unable to retrieve protocol by number: {}", number) } )
   }
-
+  ///Returns a database iterator of protocol entries.
   pub fn database_iter() -> DatabaseIterator<ProtocolEntry> {
     DatabaseIterator
   }
@@ -191,11 +178,9 @@ impl ProtocolEntry {
 pub trait Proto {
   fn protocol_number(&self) -> ProtocolInt;
 }
-
 impl Proto for Protocol {
   fn protocol_number(&self) -> ProtocolInt { self.number }
 }
-
 impl Proto for ProtocolEntry {
   fn protocol_number(&self) -> ProtocolInt { self.number }
 }
