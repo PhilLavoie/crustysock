@@ -118,7 +118,8 @@ pub const SOCK_RDM      : SocketType = SocketType{ get: consts::SOCK_RDM };     
 pub const SOCK_SEQPACKET: SocketType = SocketType{ get: consts::SOCK_SEQPACKET }; //Sequenced, reliable, connection-based, datagrams of fixed maximum length
 pub const SOCK_DCCP     : SocketType = SocketType{ get: consts::SOCK_DCCP };      //Datagram congestion protocol
 pub const SOCK_PACKET   : SocketType = SocketType{ get: consts::SOCK_PACKET };    //Linux dev level for getting packets.
-pub const SOCK_CLOEXEC  : SocketType = SocketType{ get: consts::SOCK_CLOEXEC };   //Atomically set close-on-exec flag for the new descriptors
-pub const SOCK_NONBLOCK : SocketType = SocketType{ get: consts::SOCK_NONBLOCK };  //Atomically mark descriptos as non-blockin
-
+/* Those are "oring" flags, not standalone constants.
+  pub const SOCK_CLOEXEC  : SocketType = SocketType{ get: consts::SOCK_CLOEXEC };   //Atomically set close-on-exec flag for the new descriptors
+  pub const SOCK_NONBLOCK : SocketType = SocketType{ get: consts::SOCK_NONBLOCK };  //Atomically mark descriptos as non-blockin
+*/
 

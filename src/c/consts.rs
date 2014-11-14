@@ -20,8 +20,8 @@ pub const SOCK_RDM      : c_int = 4;        //Reliably delivered
 pub const SOCK_SEQPACKET: c_int = 5;        //Sequenced, reliable, connection-based, datagrams of fixed maximum length
 pub const SOCK_DCCP     : c_int = 6;        //Datagram congestion protocol
 pub const SOCK_PACKET   : c_int = 10;       //Linux dev level for getting packets.
-pub const SOCK_CLOEXEC  : c_int = 02000000; //Atomically set close-on-exec flag for the new descriptors
-pub const SOCK_NONBLOCK : c_int = 00004000; //Atomically mark descriptos as non-blockin
+pub const SOCK_CLOEXEC  : c_int = 0o_2000000; //Atomically set close-on-exec flag for the new descriptors
+pub const SOCK_NONBLOCK : c_int = 0o_0004000; //Atomically mark descriptos as non-blockin
 
 //Taken from bits/socket.h
 //Protocol families.
