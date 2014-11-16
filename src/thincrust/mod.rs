@@ -6,14 +6,15 @@ use c::funcs::*;
 use c::types::*;
 
 pub use thincrust::consts::*;
-pub use thincrust::protocol::*;
+pub use thincrust::protocols::*;
 
 use std::mem;
 use std::c_str::CString;
 use std::num::Int;
 
-pub mod consts;
-pub mod protocol;
+mod consts;
+mod protocols;
+mod socket_addresses;
 
 ///Represents an ip address of version 4 or 6.
 pub enum IpAddress {

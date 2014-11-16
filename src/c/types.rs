@@ -6,7 +6,7 @@
 //to decouple them from the putative changes of the experimental standard library.
 extern crate libc;
 
-pub use self::libc::{c_char, c_int, socklen_t, sa_family_t};
+pub use self::libc::{c_char, c_uchar, c_int, c_short, c_ushort, socklen_t, sa_family_t};
 pub use self::libc::types::os::common::bsd44::{in_port_t, in_addr_t};
 
 ///Protocol entry extracted from the protocol database (/etc/protocols on Linux for example)
@@ -19,7 +19,7 @@ pub struct protoent {
 
 
 pub struct in_addr {
-  pub s_addr: in_addr_t,
+  pub s_addr: in_addr_t,  //Address in network byte order. However, for all intent and purposes, byte order here can be ignored... first byte corresponds to first field, second byte to second field, etc...
 }
 
 pub struct sockaddr_in {
@@ -39,6 +39,21 @@ pub struct sockaddr_in6 {
   pub sin6_flowinfo: u32,
   pub sin6_addr: in6_addr,
   pub sin6_scope_id: u32,
+}
+
+pub struct sockaddr_un {
+  pub sun_family: sa_family_t,
+  pub sun_path: [u8, ..108]
+}
+
+pub struct sockaddr_ll {
+  pub sll_family:   c_ushort,
+  pub sll_protocol: c_ushort,
+  pub sll_ifindex:  c_int,
+  pub sll_hatype:   c_ushort,
+  pub sll_pkttype:  c_uchar,
+  pub sll_halen:    c_uchar,
+  pub sll_addr:     [c_uchar, ..8]
 }
 
 pub struct sockaddr {
