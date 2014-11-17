@@ -7,7 +7,6 @@
 extern crate libc;
 
 pub use self::libc::{c_char, c_uchar, c_int, c_short, c_ushort, socklen_t, sa_family_t};
-pub use self::libc::types::os::common::bsd44::{in_addr_t};
 
 ///Protocol entry extracted from the protocol database (/etc/protocols on Linux for example)
 ///by related functions, like getprotobyname().
@@ -26,7 +25,7 @@ pub struct protoent {
 
 
 pub struct in_addr {
-  pub s_addr: in_addr_t,  //Address in network byte order. However, for all intent and purposes, byte order here can be ignored... first byte corresponds to first field, second byte to second field, etc...
+  pub s_addr: [u8, ..4],  //Address in network byte order. However, since the network byte order doesn't really matter, it has been decided that its type should be a 4 byte array instead of a 32 bit word.
 }
 
 //Ipv4

@@ -25,15 +25,8 @@ pub enum IpAddress {
 impl IpAddress {
   ///Function used to convert the 32 bits of an ipv4 address in network byte order
   ///into the equivalent IpAddress.
-  fn ipv4_from_net(ip: u32) -> IpAddress {
-    let host_endian = ip;
-    let byte_ptr = &host_endian as *const u32 as *const u8;
-    Ipv4(
-      unsafe { *byte_ptr },
-      unsafe { *(byte_ptr.offset(1)) },
-      unsafe { *(byte_ptr.offset(2)) },
-      unsafe { *(byte_ptr.offset(3)) },
-    )
+  fn ipv4_from_net(ip: [u8, ..4]) -> IpAddress {
+    Ipv4(ip[0], ip[1], ip[2], ip[3])
   }
 
   ///Function used to convert the 128 bits of an ipv6 address in network byte order
