@@ -7,7 +7,7 @@
 extern crate libc;
 
 pub use self::libc::{c_char, c_uchar, c_int, c_short, c_ushort, socklen_t, sa_family_t};
-pub use self::libc::types::os::common::bsd44::{in_port_t, in_addr_t};
+pub use self::libc::types::os::common::bsd44::{in_addr_t};
 
 ///Protocol entry extracted from the protocol database (/etc/protocols on Linux for example)
 ///by related functions, like getprotobyname().
@@ -18,13 +18,21 @@ pub struct protoent {
 }
 
 
+/**
+  Dev note: 
+  The address family of the socket address is host byte order.
+  The rest is in network byte order.
+*/
+
+
 pub struct in_addr {
   pub s_addr: in_addr_t,  //Address in network byte order. However, for all intent and purposes, byte order here can be ignored... first byte corresponds to first field, second byte to second field, etc...
 }
 
+//Ipv4
 pub struct sockaddr_in {
   pub sin_family:   sa_family_t,
-  pub sin_port:     in_port_t,
+  pub sin_port:     u16,
   pub sin_addr:     in_addr,
   pub sin_zero:     [u8, ..8],
 }
@@ -33,19 +41,22 @@ pub struct in6_addr {
   pub s6_addr: [u16, ..8],
 }
 
+//Ipv6
 pub struct sockaddr_in6 {
   pub sin6_family: sa_family_t,
-  pub sin6_port: in_port_t,
+  pub sin6_port: u16,
   pub sin6_flowinfo: u32,
   pub sin6_addr: in6_addr,
   pub sin6_scope_id: u32,
 }
 
+//Unix
 pub struct sockaddr_un {
   pub sun_family: sa_family_t,
   pub sun_path: [u8, ..108]
 }
 
+//Packet level
 pub struct sockaddr_ll {
   pub sll_family:   c_ushort,
   pub sll_protocol: c_ushort,
