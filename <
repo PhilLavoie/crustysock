@@ -3,8 +3,6 @@
 use c::funcs::{getprotobyname, getprotobynumber, getprotoent, setprotoent, endprotoent};
 use c::types::{c_int, c_char, protoent};
 
-use thincrust::consts::IpProtocol;
-
 use std::c_str::CString;
 use std::iter::Iterator;
 use std::iter::order;
@@ -186,7 +184,7 @@ impl Proto for Protocol {
 impl Proto for ProtocolEntry {
   fn protocol_number(&self) -> ProtocolInt { self.number }
 }
-impl Proto for IpProtocol {
+impl Proto for consts::IpProtocol {
   fn protocol_number(&self) -> ProtocolInt { self.get() }
 }
 

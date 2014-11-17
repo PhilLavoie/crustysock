@@ -123,3 +123,31 @@ pub const SOCK_PACKET   : SocketType = SocketType{ get: consts::SOCK_PACKET };  
   pub const SOCK_NONBLOCK : SocketType = SocketType{ get: consts::SOCK_NONBLOCK };  //Atomically mark descriptos as non-blockin
 */
 
+//Ip protocols.
+typedef!(IpProtocol, c_int)
+
+pub const IPPROTO_IP      : IpProtocol = IpProtocol{ get: consts::IPPROTO_IP };
+pub const IPPROTO_ICMP    : IpProtocol = IpProtocol{ get: consts::IPPROTO_ICMP };
+pub const IPPROTO_IGMP    : IpProtocol = IpProtocol{ get: consts::IPPROTO_IGMP };
+pub const IPPROTO_IPIP    : IpProtocol = IpProtocol{ get: consts::IPPROTO_IPIP };
+pub const IPPROTO_TCP     : IpProtocol = IpProtocol{ get: consts::IPPROTO_TCP };
+pub const IPPROTO_EGP     : IpProtocol = IpProtocol{ get: consts::IPPROTO_EGP };
+pub const IPPROTO_PUP     : IpProtocol = IpProtocol{ get: consts::IPPROTO_PUP };
+pub const IPPROTO_UDP     : IpProtocol = IpProtocol{ get: consts::IPPROTO_UDP };
+pub const IPPROTO_IDP     : IpProtocol = IpProtocol{ get: consts::IPPROTO_IDP };
+pub const IPPROTO_TP      : IpProtocol = IpProtocol{ get: consts::IPPROTO_TP };
+pub const IPPROTO_DCCP    : IpProtocol = IpProtocol{ get: consts::IPPROTO_DCCP };
+pub const IPPROTO_IPV6    : IpProtocol = IpProtocol{ get: consts::IPPROTO_IPV6 };
+pub const IPPROTO_RSVP    : IpProtocol = IpProtocol{ get: consts::IPPROTO_RSVP };
+pub const IPPROTO_GRE     : IpProtocol = IpProtocol{ get: consts::IPPROTO_GRE };
+pub const IPPROTO_ESP     : IpProtocol = IpProtocol{ get: consts::IPPROTO_ESP };
+pub const IPPROTO_AH      : IpProtocol = IpProtocol{ get: consts::IPPROTO_AH };
+pub const IPPROTO_MTP     : IpProtocol = IpProtocol{ get: consts::IPPROTO_MTP };
+pub const IPPROTO_BEETPH  : IpProtocol = IpProtocol{ get: consts::IPPROTO_BEETPH };
+pub const IPPROTO_ENCAP   : IpProtocol = IpProtocol{ get: consts::IPPROTO_ENCAP };
+pub const IPPROTO_PIM     : IpProtocol = IpProtocol{ get: consts::IPPROTO_PIM };
+pub const IPPROTO_COMP    : IpProtocol = IpProtocol{ get: consts::IPPROTO_COMP };
+pub const IPPROTO_SCTP    : IpProtocol = IpProtocol{ get: consts::IPPROTO_SCTP };
+pub const IPPROTO_UDPLITE : IpProtocol = IpProtocol{ get: consts::IPPROTO_UDPLITE };
+pub const IPPROTO_RAW     : IpProtocol = IpProtocol{ get: consts::IPPROTO_RAW };
+pub const IPPROTO_MAX     : IpProtocol = IpProtocol{ get: consts::IPPROTO_MAX };
