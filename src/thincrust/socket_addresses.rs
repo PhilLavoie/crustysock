@@ -9,7 +9,7 @@ type SocketAddressFamily = sa_family_t; //most likely u16
 type PortInt = u16;
 
 enum SocketAddress {
-  Ipv4,
+  Ipv4{ port: PortInt, address: [u8, ..4] },
   Ipv6,
   Unix,
   Packet 
