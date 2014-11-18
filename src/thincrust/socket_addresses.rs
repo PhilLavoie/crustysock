@@ -10,10 +10,24 @@ type PortInt = u16;
 
 //Eventually support all socket address type but also provide a custom one, for a fallback mechanism.
 //It could hold a *void and a size_t.
-enum SocketAddress {
-  Ipv4{ port: PortInt, address: [u8, ..4] },
-  Ipv6{ port: PortInt, address: [u16, ..8], flowinfo: u32, scope_id: u32 },
-  Unix{ path: [u8, ..108] },
+pub enum SocketAddress {
+  Ipv4( SocketAddressIpv4 ),
+  Ipv6( SocketAddressIpv6 ),
+  Unix( SocketAddressUnix ),
 }
 
+pub struct SocketAddressIpv4 {
+  port: PortInt,
+  address: [u8, ..4]
+}
 
+pub struct SocketAddressIpv6 {
+  port: PortInt,
+  address: [u16, ..8],
+  flowinfo: u32,
+  scope_id: u32
+}
+
+pub struct SocketAddressUnix {
+  path: [u8, ..108]
+}
