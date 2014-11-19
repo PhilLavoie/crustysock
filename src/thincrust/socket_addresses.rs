@@ -5,7 +5,7 @@ use std::mem;
 use std::num::Int;
 
 use c::consts::*;
-use c::types::{sockaddr, sa_family_t, sockaddr_in, in_addr, in6_addr, sockaddr_in6};
+use c::types::{sockaddr, sa_family_t, sockaddr_in, in_addr, in6_addr, sockaddr_in6, sockaddr_un};
 
 type SocketAddressFamily = sa_family_t; //most likely u16
 type PortInt = u16;
@@ -19,27 +19,52 @@ pub enum SocketAddress {
 }
 
 pub struct SocketAddressIpv4 {
-  port: PortInt,
-  address: [u8, ..4]
+  payload: sockaddr_in
 }
 
 pub struct SocketAddressIpv6 {
-  port: PortInt,
-  address: [u16, ..8],
-  flowinfo: u32,
-  scope_id: u32
+  payload: sockaddr_in6
 }
 
 pub struct SocketAddressUnix {
-  path: [u8, ..108]
+  payload: sockaddr_un
 }
 
-pub trait ToNative<T> {
-  fn to_native(&self) -> T;
+pub trait ToNative {
+  fn to_native(&self) -> (*const sockaddr, uint);
 }
 
-impl ToNative<sockaddr_in> for SocketAddressIpv4 {
-  fn to_native(&self) -> sockaddr_in {
+impl ToNative for SocketAddress {
+  fn to_native(&self) -> (*const sockaddr, uint) {
+    match *self {
+      Ipv4(ref x) => x.to_native(),
+      Ipv6(ref x) => x.to_native(),
+      Unix(ref x) => x.to_native(),
+    }
+  }
+}
+
+impl ToNative for SocketAddressIpv4 {
+  fn to_native(&self) -> (*const sockaddr, uint) {
+    (&(self.payload) as *const sockaddr_in as *const sockaddr, mem::size_of::<sockaddr_in>())
+  }
+}
+
+impl ToNative for SocketAddressIpv6 {
+  fn to_native(&self) -> (*const sockaddr, uint) {
+    (&(self.payload) as *const sockaddr_in6 as *const sockaddr, mem::size_of::<sockaddr_in6>())
+  }
+}
+
+impl ToNative for SocketAddressUnix {
+  fn to_native(&self) -> (*const sockaddr, uint) {
+    (&(self.payload) as *const sockaddr_un as *const sockaddr, mem::size_of::<sockaddr_un>())
+  }
+}
+
+/*
+impl FromNative<sockaddr_in> for SocketAddressIpv4 {
+  fn from_native(&self) -> sockaddr_in {
     let mut res: sockaddr_in = unsafe{ mem::zeroed() };
     res.sin_family = AF_INET as SocketAddressFamily;
     res.sin_port = self.port.to_be();
@@ -48,8 +73,8 @@ impl ToNative<sockaddr_in> for SocketAddressIpv4 {
   }
 }
 
-impl ToNative<sockaddr_in6> for SocketAddressIpv6 {
-  fn to_native(&self) -> sockaddr_in6 {
+impl FromNative<sockaddr_in6> for SocketAddressIpv6 {
+  fn from_native(&self) -> sockaddr_in6 {
     let mut res: sockaddr_in6 = unsafe{ mem::zeroed() };
     res.sin6_family   = AF_INET6 as SocketAddressFamily; 
     res.sin6_port     = self.port.to_be(); 
@@ -71,4 +96,12 @@ impl ToNative<sockaddr_in6> for SocketAddressIpv6 {
   }
 }
 
-
+impl FromNative<sockaddr_un> for SocketAddressUnix {
+  fn from_native(&self) -> sockaddr_un {
+    let mut res: sockaddr_un = unsafe{ mem::zeroed() };
+    assert!(false, "unfinished business");
+    res.sun_path = self.path;
+    res
+  }
+}
+*/

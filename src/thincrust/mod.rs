@@ -1,5 +1,8 @@
 //TODO: define a uniform error message/number mechanism. Maybe look into what rust std api provides, like IOError or something.
-use c::types::c_int;
+use std::mem;
+
+
+use c::types::{c_int, socklen_t};
 use c::funcs::{socket, bind};
 
 pub use thincrust::consts::*;
@@ -31,9 +34,12 @@ impl Socket {
   }
 
   //Maybe return a new structure: Bound socket?
-  pub fn bind(&mut self, sockaddr: SocketAddress) -> Result<(), String> {
-   assert!(false, "unimplemented yet");
-   Ok(())
+  //Only seems to be worth on stream sockets.
+  pub fn bind(&mut self, socket_addr: SocketAddress) -> Result<(), String> {
+    let (ptr, size_of) = socket_addr.to_native();
+    let returned = unsafe{ bind(self.sockfd, ptr, size_of as socklen_t) };
+    if returned < 0 { return Err(format!("unable to bind socket")); }
+    Ok(())
   }
 }
 

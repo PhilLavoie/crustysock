@@ -9,6 +9,9 @@ extern {
 
   pub fn close(sockfd: c_int) -> c_int;
 
+  //Apparently, some implementations might modify a field. sockaddr_un for example, can see its path
+  //appended with a null character if not present. However, it's relatively safe to assume the structure
+  //will remain constant.
   pub fn bind(sockfd: c_int, my_addr: *const sockaddr, addrlen: socklen_t) -> c_int;
 
   pub fn listen(sockfd: c_int, backlog: c_int) -> c_int;
