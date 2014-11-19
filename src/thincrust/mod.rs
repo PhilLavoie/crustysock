@@ -3,7 +3,7 @@ use std::mem;
 
 
 use c::types::{c_int, socklen_t};
-use c::funcs::{socket, bind};
+use c::funcs::{socket, bind, connect};
 
 pub use thincrust::consts::*;
 pub use thincrust::protocols::*;
@@ -39,6 +39,16 @@ impl Socket {
     let (ptr, size_of) = socket_addr.to_native();
     let returned = unsafe{ bind(self.sockfd, ptr, size_of as socklen_t) };
     if returned < 0 { return Err(format!("unable to bind socket")); }
+    Ok(())
+  }
+
+
+  //TODO: replace Result<(), String> with option String essé
+
+  pub fn connect(&mut self, socket_addr: SocketAddress) -> Result<(), String> {
+    let (ptr, size_of) = socket_addr.to_native();
+    let returned = unsafe{ connect(self.sockfd, ptr, size_of as socklen_t) };
+    if returned < 0 { return Err(format!("unable to connect socket")); }
     Ok(())
   }
 }
