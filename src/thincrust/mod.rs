@@ -3,7 +3,7 @@ use std::mem;
 
 
 use c::types::{c_int, socklen_t};
-use c::funcs::{socket, bind, connect};
+use c::funcs::{socket, bind, connect, listen};
 
 pub use thincrust::consts::*;
 pub use thincrust::protocols::*;
@@ -49,6 +49,14 @@ impl Socket {
     let (ptr, size_of) = socket_addr.to_native();
     let returned = unsafe{ connect(self.sockfd, ptr, size_of as socklen_t) };
     if returned < 0 { return Err(format!("unable to connect socket")); }
+    Ok(())
+  }
+
+  //Listen requires an already bounded port, so it may be interesting to allow
+  //for a BoundedSocket type. Should only be used on SOCK_STREAM and SOCK_SEQPACKET
+  pub fn listen(&mut self, backlog: c_int) -> Result<(), String> {
+    let returned = unsafe{ listen(self.sockfd, backlog) }; 
+    if returned < 0 { return Err(format!("unable to listen")); }
     Ok(())
   }
 }
