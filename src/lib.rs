@@ -1,4 +1,4 @@
-#![feature(globs, macro_rules, unsafe_destructor, struct_variant)]
+#![feature(globs, macro_rules, unsafe_destructor)]
 pub mod c;
 pub mod thincrust;
 

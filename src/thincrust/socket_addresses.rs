@@ -1,14 +1,36 @@
 /**
   Socket address module. Wraps around the underlying C equivalent (sockaddr, sockaddr_in, sockaddr_in6, etc...).
 */
+
+//TODO: present a uniform socket size integer type... merge uints and socklen_ts
+
 use std::mem;
 use std::num::Int;
 
 use c::consts::*;
-use c::types::{sockaddr, sa_family_t, sockaddr_in, in_addr, in6_addr, sockaddr_in6, sockaddr_un};
+use c::types::{socklen_t, sockaddr, sa_family_t, sockaddr_in, in_addr, in6_addr, sockaddr_in6, sockaddr_un, sockaddr_storage};
 
 type SocketAddressFamily = sa_family_t; //most likely u16
 type PortInt = u16;
+
+pub struct SocketAddressStorage {
+  payload: sockaddr_storage,
+  size:    socklen_t
+}
+
+impl SocketAddressStorage {
+  pub fn new() -> SocketAddressStorage {
+    return SocketAddressStorage{ payload: unsafe{ mem::zeroed() }, size: mem::size_of::<sockaddr_storage>() as socklen_t }
+  }
+
+  pub fn to_native(&mut self) -> (*mut sockaddr, *mut socklen_t) {
+    (&mut (self.payload) as *mut sockaddr_storage as *mut sockaddr, &mut (self.size) as *mut socklen_t)
+  }
+
+  pub fn to_socket_address(&self) -> ! {
+    panic!("unimplemented");
+  }
+}
 
 //Eventually support all socket address type but also provide a custom one, for a fallback mechanism.
 //It could hold a *void and a size_t.
@@ -37,9 +59,9 @@ pub trait ToNative {
 impl ToNative for SocketAddress {
   fn to_native(&self) -> (*const sockaddr, uint) {
     match *self {
-      Ipv4(ref x) => x.to_native(),
-      Ipv6(ref x) => x.to_native(),
-      Unix(ref x) => x.to_native(),
+      SocketAddress::Ipv4(ref x) => x.to_native(),
+      SocketAddress::Ipv6(ref x) => x.to_native(),
+      SocketAddress::Unix(ref x) => x.to_native(),
     }
   }
 }

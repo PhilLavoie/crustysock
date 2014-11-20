@@ -72,6 +72,14 @@ pub struct sockaddr_ll {
   pub sll_addr:     [c_uchar, ..8]
 }
 
+//Socket storage for when receiving a socket address (as when calling accept()).
+#[repr(C)]
+pub struct sockaddr_storage {
+  pub ss_family: sa_family_t,
+  pub __ss_align: i64,
+  pub __ss_pad2: [u8, ..112],
+}
+
 #[repr(C)]
 pub struct sockaddr {
   pub sa_family:  sa_family_t,

@@ -17,13 +17,13 @@ impl IpAddress {
   ///Function used to convert the 32 bits of an ipv4 address in network byte order
   ///into the equivalent IpAddress.
   fn ipv4_from_net(ip: [u8, ..4]) -> IpAddress {
-    Ipv4(ip[0], ip[1], ip[2], ip[3])
+    IpAddress::Ipv4(ip[0], ip[1], ip[2], ip[3])
   }
 
   ///Function used to convert the 128 bits of an ipv6 address in network byte order
   ///into the equivalent IpAddress.
   fn ipv6_from_net(byte_array: [u16, ..8]) -> IpAddress {
-    Ipv6(
+    IpAddress::Ipv6(
       Int::from_be(byte_array[0]),
       Int::from_be(byte_array[1]),
       Int::from_be(byte_array[2]),
