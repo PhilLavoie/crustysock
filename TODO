@@ -1,1 +1,3 @@
-Finalize the protocol module with all available functions.
+accept() returns a new socket and sets the remote connecting socket address. Add accept(), sockaddr_storage and close().
+Implement the error system.
+Consider exposing the c integer types in thincrust. Not sure if there is a point not doing so. If they are variable on the underlying architecture, they should be presented as such.

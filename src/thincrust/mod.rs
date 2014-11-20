@@ -52,7 +52,7 @@ impl Socket {
     Ok(())
   }
 
-  //Listen requires an already bounded port, so it may be interesting to allow
+  //Listen requires an already bounded socket, so it may be interesting to allow
   //for a BoundedSocket type. Should only be used on SOCK_STREAM and SOCK_SEQPACKET
   pub fn listen(&mut self, backlog: c_int) -> Result<(), String> {
     let returned = unsafe{ listen(self.sockfd, backlog) }; 

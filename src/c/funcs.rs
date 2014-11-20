@@ -7,6 +7,7 @@ extern {
   //Socket related functions.
   pub fn socket(domain: c_int, sock_type: c_int, protocol: c_int) -> c_int;
 
+  //TODO: This is from the standard C api me thinks, check it out before dying.
   pub fn close(sockfd: c_int) -> c_int;
 
   //Apparently, some implementations might modify a field. sockaddr_un for example, can see its path
