@@ -2,15 +2,15 @@
 
 //Basic primitive c types are imported directly from the already provided interface
 //of the standard rust library, since the compiler is in better position to provide
-//the size of a c_int for example. Most of the other types are defined here
+//the actual size of a c_int for example. Most of the other types are defined here
 //to decouple them from the putative changes of the experimental standard library.
 extern crate libc;
 
-pub use self::libc::{c_char, c_uchar, c_int, c_short, c_ushort, socklen_t, sa_family_t};
+pub use self::libc::{c_void, c_char, c_uchar, c_int, c_short, c_ushort, socklen_t, sa_family_t, size_t, ssize_t};
 
-#[repr(C)]
 ///Protocol entry extracted from the protocol database (/etc/protocols on Linux for example)
 ///by related functions, like getprotobyname().
+#[repr(C)]
 pub struct protoent {
   pub p_name:     *const c_char,        //Official protocol name
   pub p_aliases:  *const *const c_char, //Alias list

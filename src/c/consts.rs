@@ -140,3 +140,27 @@ pub const IPPROTO_SCTP    : c_int = 132;
 pub const IPPROTO_UDPLITE : c_int = 136;
 pub const IPPROTO_RAW     : c_int = 255;
 pub const IPPROTO_MAX     : c_int = 256;
+
+
+pub const MSG_OOB: c_int          = 0x01;           /* Process out-of-band data.  */
+pub const MSG_PEEK: c_int         = 0x02;           /* Peek at incoming messages.  */
+pub const MSG_DONTROUTE: c_int    = 0x04;           /* Don't use local routing.  */
+/* DECnet uses a different name.  */
+pub const MSG_TRYHARD: c_int      = MSG_DONTROUTE;
+pub const MSG_CTRUNC: c_int       = 0x08;           /* Control data lost before delivery.  */
+pub const MSG_PROXY: c_int        = 0x10;           /* Supply or ask second address.  */
+pub const MSG_TRUNC: c_int        = 0x20;
+pub const MSG_DONTWAIT: c_int     = 0x40;           /* Nonblocking IO.  */
+pub const MSG_EOR: c_int          = 0x80;           /* End of record.  */
+pub const MSG_WAITALL: c_int      = 0x100;          /* Wait for a full request.  */
+pub const MSG_FIN: c_int          = 0x200;
+pub const MSG_SYN: c_int          = 0x400;
+pub const MSG_CONFIRM: c_int      = 0x800;          /* Confirm path validity.  */
+pub const MSG_RST: c_int          = 0x1000;
+pub const MSG_ERRQUEUE: c_int     = 0x2000;         /* Fetch message from error queue.  */
+pub const MSG_NOSIGNAL: c_int     = 0x4000;         /* Do not generate SIGPIPE.  */
+pub const MSG_MORE: c_int         = 0x8000;         /* Sender will send more.  */
+pub const MSG_WAITFORONE: c_int   = 0x10000;        /* Wait for at least one packet to return.*/
+pub const MSG_FASTOPEN: c_int     = 0x20000000;     /* Send data in TCP SYN.  */
+pub const MSG_CMSG_CLOEXEC: c_int = 0x40000000;     /* Set close_on_exit for file descriptor received through SCM_RIGHTS.  */
+

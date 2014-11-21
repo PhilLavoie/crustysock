@@ -20,7 +20,9 @@ extern {
   pub fn accept(sockfd: c_int, cliaddr: *mut sockaddr, addrlen: *mut socklen_t) -> c_int;
 
   pub fn connect(sockfd: c_int, serv_addr: *const sockaddr, addrlen: socklen_t) -> c_int;
-  
+
+  pub fn send(sockfd: c_int, buf: *const c_void, len: size_t, flags: c_int) -> ssize_t;
+
   pub fn getsockname(sockfd: c_int, addr: *mut sockaddr, addrlen: *mut socklen_t) -> c_int;
 
   //Addrinfo related functions.

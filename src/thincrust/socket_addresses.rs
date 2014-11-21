@@ -2,8 +2,6 @@
   Socket address module. Wraps around the underlying C equivalent (sockaddr, sockaddr_in, sockaddr_in6, etc...).
 */
 
-//TODO: present a uniform socket size integer type... merge uints and socklen_ts
-
 use std::mem;
 use std::num::Int;
 
@@ -57,7 +55,7 @@ pub trait FromNative {
 }
 
 pub trait ToNative {
-  fn to_native(&self) -> (*const sockaddr, uint);
+  fn to_native(&self) -> (*const sockaddr, socklen_t);
 }
 
 fn dispatch<F: FromNative>(sock: *const sockaddr, len: socklen_t, ctor: |F| -> SocketAddress) -> Result<SocketAddress, String> {
@@ -81,7 +79,7 @@ impl FromNative for SocketAddress {
 }
 
 impl ToNative for SocketAddress {
-  fn to_native(&self) -> (*const sockaddr, uint) {
+  fn to_native(&self) -> (*const sockaddr, socklen_t) {
     match *self {
       SocketAddress::Ipv4(ref x) => x.to_native(),
       SocketAddress::Ipv6(ref x) => x.to_native(),
@@ -106,8 +104,8 @@ impl FromNative for SocketAddressIpv4 {
 }
 
 impl ToNative for SocketAddressIpv4 {
-  fn to_native(&self) -> (*const sockaddr, uint) {
-    (&(self.payload) as *const sockaddr_in as *const sockaddr, mem::size_of::<sockaddr_in>())
+  fn to_native(&self) -> (*const sockaddr, socklen_t) {
+    (&(self.payload) as *const sockaddr_in as *const sockaddr, mem::size_of::<sockaddr_in>() as socklen_t)
   }
 }
 
@@ -127,8 +125,8 @@ impl FromNative for SocketAddressIpv6 {
 }
 
 impl ToNative for SocketAddressIpv6 {
-  fn to_native(&self) -> (*const sockaddr, uint) {
-    (&(self.payload) as *const sockaddr_in6 as *const sockaddr, mem::size_of::<sockaddr_in6>())
+  fn to_native(&self) -> (*const sockaddr, socklen_t) {
+    (&(self.payload) as *const sockaddr_in6 as *const sockaddr, mem::size_of::<sockaddr_in6>() as socklen_t)
   }
 }
 
@@ -150,8 +148,8 @@ impl FromNative for SocketAddressUnix {
 }
 
 impl ToNative for SocketAddressUnix {
-  fn to_native(&self) -> (*const sockaddr, uint) {
-    (&(self.payload) as *const sockaddr_un as *const sockaddr, mem::size_of::<sockaddr_un>())
+  fn to_native(&self) -> (*const sockaddr, socklen_t) {
+    (&(self.payload) as *const sockaddr_un as *const sockaddr, mem::size_of::<sockaddr_un>() as socklen_t)
   }
 }
 
