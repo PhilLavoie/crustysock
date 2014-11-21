@@ -61,14 +61,15 @@ impl Socket {
   }
 
   //Returns a new socket holding the connection and the incoming communication's
-  //socket address.
+  //socket address. It is noteworthy that the underlying call can ignore the
+  //incoming sockaddr structure if passed two null pointers. Should be used on 
+  //a listening socket.
   pub fn accept(&mut self) -> Result<(Socket, SocketAddress), String> {
     let mut storage = SocketAddressStorage::new();
     let (ptr, size_of) = storage.to_native();
     let returned = unsafe{ accept(self.sockfd, ptr, size_of) };
     if returned == -1 { return Err(format!("unable to accept")); }
 
-    assert!(false, "shaddap");
     Ok((Socket{ sockfd: returned }, storage.to_socket_address()))
   }
 }
