@@ -158,27 +158,27 @@ pub const IPPROTO_MAX     : IpProtocol = IpProtocol{ get: consts::IPPROTO_MAX };
 //Flag.
 typedef!(Flag, c_int)
 
-pub const MSG_OOB         : Flag  = Flag{ get: 0x01 };           /* Process out-of-band data.  */
-pub const MSG_PEEK        : Flag  = Flag{ get: 0x02 };           /* Peek at incoming messages.  */
-pub const MSG_DONTROUTE   : Flag  = Flag{ get: 0x04 };           /* Don't use local routing.  */
+pub const MSG_OOB         : Flag  = Flag{ get: consts::MSG_OOB };           /* Process out-of-band data.  */
+pub const MSG_PEEK        : Flag  = Flag{ get: consts::MSG_PEEK };           /* Peek at incoming messages.  */
+pub const MSG_DONTROUTE   : Flag  = Flag{ get: consts::MSG_DONTROUTE };           /* Don't use local routing.  */
 /* DECnet uses a different name.  */
 pub const MSG_TRYHARD     : Flag  = MSG_DONTROUTE;
-pub const MSG_CTRUNC      : Flag  = Flag{ get: 0x08 };           /* Control data lost before delivery.  */
-pub const MSG_PROXY       : Flag  = Flag{ get: 0x10 };           /* Supply or ask second address.  */
-pub const MSG_TRUNC       : Flag  = Flag{ get: 0x20 };
-pub const MSG_DONTWAIT    : Flag  = Flag{ get: 0x40 };           /* Nonblocking IO.  */
-pub const MSG_EOR         : Flag  = Flag{ get: 0x80 };           /* End of record.  */
-pub const MSG_WAITALL     : Flag  = Flag{ get: 0x100 };          /* Wait for a full request.  */
-pub const MSG_FIN         : Flag  = Flag{ get: 0x200 };
-pub const MSG_SYN         : Flag  = Flag{ get: 0x400 };
-pub const MSG_CONFIRM     : Flag  = Flag{ get: 0x800 };          /* Confirm path validity.  */
-pub const MSG_RST         : Flag  = Flag{ get: 0x1000 };
-pub const MSG_ERRQUEUE    : Flag  = Flag{ get: 0x2000 };         /* Fetch message from error queue.  */
-pub const MSG_NOSIGNAL    : Flag  = Flag{ get: 0x4000 };         /* Do not generate SIGPIPE.  */
-pub const MSG_MORE        : Flag  = Flag{ get: 0x8000 };         /* Sender will send more.  */
-pub const MSG_WAITFORONE  : Flag  = Flag{ get: 0x10000 };        /* Wait for at least one packet to return.*/
-pub const MSG_FASTOPEN    : Flag  = Flag{ get: 0x20000000 };     /* Send data in TCP SYN.  */
-pub const MSG_CMSG_CLOEXEC: Flag  = Flag{ get: 0x40000000 };     /* Set close_on_exit for file descriptor received through SCM_RIGHTS.  */
+pub const MSG_CTRUNC      : Flag  = Flag{ get: consts::MSG_CTRUNC };           /* Control data lost before delivery.  */
+pub const MSG_PROXY       : Flag  = Flag{ get: consts::MSG_PROXY };           /* Supply or ask second address.  */
+pub const MSG_TRUNC       : Flag  = Flag{ get: consts::MSG_TRUNC };
+pub const MSG_DONTWAIT    : Flag  = Flag{ get: consts::MSG_DONTWAIT };           /* Nonblocking IO.  */
+pub const MSG_EOR         : Flag  = Flag{ get: consts::MSG_EOR };           /* End of record.  */
+pub const MSG_WAITALL     : Flag  = Flag{ get: consts::MSG_WAITALL };          /* Wait for a full request.  */
+pub const MSG_FIN         : Flag  = Flag{ get: consts::MSG_FIN };
+pub const MSG_SYN         : Flag  = Flag{ get: consts::MSG_SYN };
+pub const MSG_CONFIRM     : Flag  = Flag{ get: consts::MSG_CONFIRM };          /* Confirm path validity.  */
+pub const MSG_RST         : Flag  = Flag{ get: consts::MSG_RST };
+pub const MSG_ERRQUEUE    : Flag  = Flag{ get: consts::MSG_ERRQUEUE };         /* Fetch message from error queue.  */
+pub const MSG_NOSIGNAL    : Flag  = Flag{ get: consts::MSG_NOSIGNAL };         /* Do not generate SIGPIPE.  */
+pub const MSG_MORE        : Flag  = Flag{ get: consts::MSG_MORE };         /* Sender will send more.  */
+pub const MSG_WAITFORONE  : Flag  = Flag{ get: consts::MSG_WAITFORONE };        /* Wait for at least one packet to return.*/
+pub const MSG_FASTOPEN    : Flag  = Flag{ get: consts::MSG_FASTOPEN };     /* Send data in TCP SYN.  */
+pub const MSG_CMSG_CLOEXEC: Flag  = Flag{ get: consts::MSG_CMSG_CLOEXEC };     /* Set close_on_exit for file descriptor received through SCM_RIGHTS.  */
 
 //Structure for oring flags.
 typedef!(Flags, c_int)
@@ -200,7 +200,6 @@ fn test_flags() {
   assert!(my_flags.has(&MSG_OOB));
   assert!(my_flags.has(&MSG_TRUNC));
   assert!(my_flags.has(&MSG_FASTOPEN));
-
 }
 
 
