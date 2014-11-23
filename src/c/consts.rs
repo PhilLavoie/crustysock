@@ -163,4 +163,3 @@ pub const MSG_MORE: c_int         = 0x8000;         /* Sender will send more.  *
 pub const MSG_WAITFORONE: c_int   = 0x10000;        /* Wait for at least one packet to return.*/
 pub const MSG_FASTOPEN: c_int     = 0x20000000;     /* Send data in TCP SYN.  */
 pub const MSG_CMSG_CLOEXEC: c_int = 0x40000000;     /* Set close_on_exit for file descriptor received through SCM_RIGHTS.  */
-

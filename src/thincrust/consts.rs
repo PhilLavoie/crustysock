@@ -1,6 +1,7 @@
 use c::types::{c_int};
 use c::consts;
 
+//TODO: check how to make this macro generate a type that doesn't move ownsership, rather just copies it and it's ALL RIGHT ESSÉ
 macro_rules! typedef(
   ($new_type:ident, $wrapped:ty) => (
     pub struct $new_type {
@@ -151,3 +152,58 @@ pub const IPPROTO_SCTP    : IpProtocol = IpProtocol{ get: consts::IPPROTO_SCTP }
 pub const IPPROTO_UDPLITE : IpProtocol = IpProtocol{ get: consts::IPPROTO_UDPLITE };
 pub const IPPROTO_RAW     : IpProtocol = IpProtocol{ get: consts::IPPROTO_RAW };
 pub const IPPROTO_MAX     : IpProtocol = IpProtocol{ get: consts::IPPROTO_MAX };
+
+
+//TODO: finish implementing this (wrap it up)
+//Flag.
+typedef!(Flag, c_int)
+
+pub const MSG_OOB         : Flag  = Flag{ get: 0x01 };           /* Process out-of-band data.  */
+pub const MSG_PEEK        : Flag  = Flag{ get: 0x02 };           /* Peek at incoming messages.  */
+pub const MSG_DONTROUTE   : Flag  = Flag{ get: 0x04 };           /* Don't use local routing.  */
+/* DECnet uses a different name.  */
+pub const MSG_TRYHARD     : Flag  = MSG_DONTROUTE;
+pub const MSG_CTRUNC      : Flag  = Flag{ get: 0x08 };           /* Control data lost before delivery.  */
+pub const MSG_PROXY       : Flag  = Flag{ get: 0x10 };           /* Supply or ask second address.  */
+pub const MSG_TRUNC       : Flag  = Flag{ get: 0x20 };
+pub const MSG_DONTWAIT    : Flag  = Flag{ get: 0x40 };           /* Nonblocking IO.  */
+pub const MSG_EOR         : Flag  = Flag{ get: 0x80 };           /* End of record.  */
+pub const MSG_WAITALL     : Flag  = Flag{ get: 0x100 };          /* Wait for a full request.  */
+pub const MSG_FIN         : Flag  = Flag{ get: 0x200 };
+pub const MSG_SYN         : Flag  = Flag{ get: 0x400 };
+pub const MSG_CONFIRM     : Flag  = Flag{ get: 0x800 };          /* Confirm path validity.  */
+pub const MSG_RST         : Flag  = Flag{ get: 0x1000 };
+pub const MSG_ERRQUEUE    : Flag  = Flag{ get: 0x2000 };         /* Fetch message from error queue.  */
+pub const MSG_NOSIGNAL    : Flag  = Flag{ get: 0x4000 };         /* Do not generate SIGPIPE.  */
+pub const MSG_MORE        : Flag  = Flag{ get: 0x8000 };         /* Sender will send more.  */
+pub const MSG_WAITFORONE  : Flag  = Flag{ get: 0x10000 };        /* Wait for at least one packet to return.*/
+pub const MSG_FASTOPEN    : Flag  = Flag{ get: 0x20000000 };     /* Send data in TCP SYN.  */
+pub const MSG_CMSG_CLOEXEC: Flag  = Flag{ get: 0x40000000 };     /* Set close_on_exit for file descriptor received through SCM_RIGHTS.  */
+
+//Structure for oring flags.
+typedef!(Flags, c_int)
+
+impl Flags {
+  pub fn new() -> Flags { Flags{ get: 0 } }
+  pub fn has(&self, f: &Flag) -> bool { (self.get & f.get()) == f.get() }
+}
+
+impl BitOr<Flag, Flags> for Flags {
+  fn bitor(&self, rhs: &Flag) -> Flags {
+    Flags{ get: self.get | rhs.get() }
+  }
+}
+
+#[test]
+fn test_flags() {
+  let my_flags = Flags::new() | MSG_OOB | MSG_TRUNC | MSG_FASTOPEN;
+  assert!(my_flags.has(&MSG_OOB));
+  assert!(my_flags.has(&MSG_TRUNC));
+  assert!(my_flags.has(&MSG_FASTOPEN));
+
+}
+
+
+
+
+
