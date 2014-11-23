@@ -119,7 +119,9 @@ pub const SOCK_RDM      : SocketType = SocketType{ get: consts::SOCK_RDM };     
 pub const SOCK_SEQPACKET: SocketType = SocketType{ get: consts::SOCK_SEQPACKET }; //Sequenced, reliable, connection-based, datagrams of fixed maximum length
 pub const SOCK_DCCP     : SocketType = SocketType{ get: consts::SOCK_DCCP };      //Datagram congestion protocol
 pub const SOCK_PACKET   : SocketType = SocketType{ get: consts::SOCK_PACKET };    //Linux dev level for getting packets.
-/* Those are "oring" flags, not standalone constants.
+/* 
+  TODO: implement this. Thanks essé.
+  Those are "oring" flags, not standalone constants.
   pub const SOCK_CLOEXEC  : SocketType = SocketType{ get: consts::SOCK_CLOEXEC };   //Atomically set close-on-exec flag for the new descriptors
   pub const SOCK_NONBLOCK : SocketType = SocketType{ get: consts::SOCK_NONBLOCK };  //Atomically mark descriptos as non-blockin
 */
@@ -153,32 +155,30 @@ pub const IPPROTO_UDPLITE : IpProtocol = IpProtocol{ get: consts::IPPROTO_UDPLIT
 pub const IPPROTO_RAW     : IpProtocol = IpProtocol{ get: consts::IPPROTO_RAW };
 pub const IPPROTO_MAX     : IpProtocol = IpProtocol{ get: consts::IPPROTO_MAX };
 
-
-//TODO: finish implementing this (wrap it up)
 //Flag.
 typedef!(Flag, c_int)
 
 pub const MSG_OOB         : Flag  = Flag{ get: consts::MSG_OOB };           /* Process out-of-band data.  */
-pub const MSG_PEEK        : Flag  = Flag{ get: consts::MSG_PEEK };           /* Peek at incoming messages.  */
-pub const MSG_DONTROUTE   : Flag  = Flag{ get: consts::MSG_DONTROUTE };           /* Don't use local routing.  */
+pub const MSG_PEEK        : Flag  = Flag{ get: consts::MSG_PEEK };          /* Peek at incoming messages.  */
+pub const MSG_DONTROUTE   : Flag  = Flag{ get: consts::MSG_DONTROUTE };     /* Don't use local routing.  */
 /* DECnet uses a different name.  */
 pub const MSG_TRYHARD     : Flag  = MSG_DONTROUTE;
-pub const MSG_CTRUNC      : Flag  = Flag{ get: consts::MSG_CTRUNC };           /* Control data lost before delivery.  */
-pub const MSG_PROXY       : Flag  = Flag{ get: consts::MSG_PROXY };           /* Supply or ask second address.  */
+pub const MSG_CTRUNC      : Flag  = Flag{ get: consts::MSG_CTRUNC };        /* Control data lost before delivery.  */
+pub const MSG_PROXY       : Flag  = Flag{ get: consts::MSG_PROXY };         /* Supply or ask second address.  */
 pub const MSG_TRUNC       : Flag  = Flag{ get: consts::MSG_TRUNC };
-pub const MSG_DONTWAIT    : Flag  = Flag{ get: consts::MSG_DONTWAIT };           /* Nonblocking IO.  */
+pub const MSG_DONTWAIT    : Flag  = Flag{ get: consts::MSG_DONTWAIT };      /* Nonblocking IO.  */
 pub const MSG_EOR         : Flag  = Flag{ get: consts::MSG_EOR };           /* End of record.  */
-pub const MSG_WAITALL     : Flag  = Flag{ get: consts::MSG_WAITALL };          /* Wait for a full request.  */
+pub const MSG_WAITALL     : Flag  = Flag{ get: consts::MSG_WAITALL };       /* Wait for a full request.  */
 pub const MSG_FIN         : Flag  = Flag{ get: consts::MSG_FIN };
 pub const MSG_SYN         : Flag  = Flag{ get: consts::MSG_SYN };
-pub const MSG_CONFIRM     : Flag  = Flag{ get: consts::MSG_CONFIRM };          /* Confirm path validity.  */
+pub const MSG_CONFIRM     : Flag  = Flag{ get: consts::MSG_CONFIRM };       /* Confirm path validity.  */
 pub const MSG_RST         : Flag  = Flag{ get: consts::MSG_RST };
-pub const MSG_ERRQUEUE    : Flag  = Flag{ get: consts::MSG_ERRQUEUE };         /* Fetch message from error queue.  */
-pub const MSG_NOSIGNAL    : Flag  = Flag{ get: consts::MSG_NOSIGNAL };         /* Do not generate SIGPIPE.  */
-pub const MSG_MORE        : Flag  = Flag{ get: consts::MSG_MORE };         /* Sender will send more.  */
-pub const MSG_WAITFORONE  : Flag  = Flag{ get: consts::MSG_WAITFORONE };        /* Wait for at least one packet to return.*/
-pub const MSG_FASTOPEN    : Flag  = Flag{ get: consts::MSG_FASTOPEN };     /* Send data in TCP SYN.  */
-pub const MSG_CMSG_CLOEXEC: Flag  = Flag{ get: consts::MSG_CMSG_CLOEXEC };     /* Set close_on_exit for file descriptor received through SCM_RIGHTS.  */
+pub const MSG_ERRQUEUE    : Flag  = Flag{ get: consts::MSG_ERRQUEUE };      /* Fetch message from error queue.  */
+pub const MSG_NOSIGNAL    : Flag  = Flag{ get: consts::MSG_NOSIGNAL };      /* Do not generate SIGPIPE.  */
+pub const MSG_MORE        : Flag  = Flag{ get: consts::MSG_MORE };          /* Sender will send more.  */
+pub const MSG_WAITFORONE  : Flag  = Flag{ get: consts::MSG_WAITFORONE };    /* Wait for at least one packet to return.*/
+pub const MSG_FASTOPEN    : Flag  = Flag{ get: consts::MSG_FASTOPEN };      /* Send data in TCP SYN.  */
+pub const MSG_CMSG_CLOEXEC: Flag  = Flag{ get: consts::MSG_CMSG_CLOEXEC };  /* Set close_on_exit for file descriptor received through SCM_RIGHTS.  */
 
 //Structure for oring flags.
 typedef!(Flags, c_int)
@@ -186,6 +186,7 @@ typedef!(Flags, c_int)
 impl Flags {
   pub fn new() -> Flags { Flags{ get: 0 } }
   pub fn has(&self, f: &Flag) -> bool { (self.get & f.get()) == f.get() }
+  pub fn is_empty(&self) -> bool { self.get == 0 }
 }
 
 impl BitOr<Flag, Flags> for Flags {
@@ -196,10 +197,16 @@ impl BitOr<Flag, Flags> for Flags {
 
 #[test]
 fn test_flags() {
+  assert!(Flags::new().is_empty());
+
   let my_flags = Flags::new() | MSG_OOB | MSG_TRUNC | MSG_FASTOPEN;
+  assert!(!my_flags.is_empty());
   assert!(my_flags.has(&MSG_OOB));
   assert!(my_flags.has(&MSG_TRUNC));
   assert!(my_flags.has(&MSG_FASTOPEN));
+
+  assert!(!my_flags.has(&MSG_SYN));
+  assert!(!my_flags.has(&MSG_PEEK));
 }
 
 
